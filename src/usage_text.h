@@ -90,6 +90,8 @@
     "                              proxy server for a particular protocol using the\n" \
     "                              --http-proxy, --https-proxy and --ftp-proxy\n" \
     "                              options.\n"                          \
+    "                              Supports socks5://HOST:PORT without auth\n" \
+    "                              for HTTP and HTTPS downloads.\n"          \
     "                              This affects all downloads.")
 #define TEXT_HTTP_USER                                                  \
   _(" --http-user=USER             Set HTTP user. This affects all URLs.")

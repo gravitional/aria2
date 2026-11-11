@@ -37,6 +37,7 @@
 
 #include "AbstractCommand.h"
 #include "ControlChain.h"
+#include <string>
 
 namespace aria2 {
 
@@ -63,6 +64,14 @@ private:
   std::shared_ptr<Request> proxyRequest_;
   std::shared_ptr<BackupConnectInfo> backupConnectionInfo_;
   std::shared_ptr<ControlChain<ConnectCommand*>> chain_;
+  int socks5State_ = 0;
+  std::string socks5Send_;
+  std::string socks5ConnectRequest_;
+  size_t socks5SendOffset_ = 0;
+  std::string socks5Recv_;
+  size_t socks5RecvExpected_ = 0;
+
+  bool processSocks5();
 };
 
 } // namespace aria2

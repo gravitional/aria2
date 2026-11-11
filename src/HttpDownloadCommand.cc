@@ -80,8 +80,10 @@ bool HttpDownloadCommand::prepareForNextSegment()
         httpConnection_, getDownloadEngine(), getSocket());
     // Set proxy request here. aria2 sends the HTTP request specialized for
     // proxy.
-    if (resolveProxyMethod(getRequest()->getProtocol()) == V_GET) {
-      command->setProxyRequest(createProxyRequest());
+    auto proxy = createProxyRequest();
+    if (resolveProxyMethod(getRequest()->getProtocol()) == V_GET &&
+        (!proxy || proxy->getProtocol() != "socks5")) {
+      command->setProxyRequest(proxy);
     }
     getDownloadEngine()->addCommand(std::move(command));
     return true;

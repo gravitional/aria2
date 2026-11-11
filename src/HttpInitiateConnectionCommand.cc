@@ -88,7 +88,10 @@ std::unique_ptr<Command> HttpInitiateConnectionCommand::createNextCommand(
       auto c = make_unique<ConnectCommand>(
           getCuid(), getRequest(), proxyRequest, getFileEntry(),
           getRequestGroup(), getDownloadEngine(), getSocket());
-      if (proxyMethod == V_TUNNEL) {
+      if (proxyRequest->getProtocol() == "socks5") {
+        c->setControlChain(std::make_shared<HttpRequestConnectChain>());
+      }
+      else if (proxyMethod == V_TUNNEL) {
         c->setControlChain(std::make_shared<HttpProxyRequestConnectChain>());
       }
       else if (proxyMethod == V_GET) {
@@ -109,7 +112,7 @@ std::unique_ptr<Command> HttpInitiateConnectionCommand::createNextCommand(
               getCuid(), pooledSocket,
               std::make_shared<SocketRecvBuffer>(pooledSocket)),
           getDownloadEngine(), pooledSocket);
-      if (proxyMethod == V_GET) {
+      if (proxyMethod == V_GET && proxyRequest->getProtocol() != "socks5") {
         c->setProxyRequest(proxyRequest);
       }
       return std::move(c);

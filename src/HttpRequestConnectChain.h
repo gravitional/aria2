@@ -54,7 +54,10 @@ struct HttpRequestConnectChain : public ControlChain<ConnectCommand*> {
     auto c = make_unique<HttpRequestCommand>(
         t->getCuid(), t->getRequest(), t->getFileEntry(), t->getRequestGroup(),
         k, e, t->getSocket());
-    c->setProxyRequest(t->getProxyRequest());
+    if (!t->getProxyRequest() ||
+        t->getProxyRequest()->getProtocol() != "socks5") {
+      c->setProxyRequest(t->getProxyRequest());
+    }
     c->setStatus(Command::STATUS_ONESHOT_REALTIME);
     e->setNoWait(true);
     e->addCommand(std::move(c));

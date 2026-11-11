@@ -72,7 +72,7 @@ extern void showUsage(const std::string& keyword,
                       const Console& out);
 
 namespace {
-bool overrideWithEnv(Option& op,
+void overrideWithEnv(Option& op,
                      const std::shared_ptr<OptionParser>& optionParser,
                      PrefPtr pref, const std::string& envName)
 {
@@ -80,7 +80,6 @@ bool overrideWithEnv(Option& op,
   if (value) {
     try {
       optionParser->find(pref)->parse(op, value);
-      return true;
     }
     catch (Exception& e) {
       global::cerr()->printf(
@@ -89,7 +88,6 @@ bool overrideWithEnv(Option& op,
       global::cerr()->printf("\n%s\n", e.stackTrace().c_str());
     }
   }
-  return false;
 }
 } // namespace
 
@@ -262,19 +260,10 @@ error_code::Value option_processing(Option& op, bool standalone,
       }
     }
     // Override configuration with environment variables.
-    bool hasHttpProxy =
-        overrideWithEnv(*confOption, oparser, PREF_HTTP_PROXY, "http_proxy");
-    bool hasHttpsProxy = overrideWithEnv(*confOption, oparser,
-                                         PREF_HTTPS_PROXY, "https_proxy");
-    bool hasFtpProxy =
-        overrideWithEnv(*confOption, oparser, PREF_FTP_PROXY, "ftp_proxy");
-    // ALL_PROXY is only a fallback.  Do not parse it if protocol-specific
-    // environment variables already provide proxies for every supported
-    // protocol; in particular, this lets users keep an unrelated proxy URI
-    // scheme in ALL_PROXY without causing a startup warning.
-    if (!(hasHttpProxy && hasHttpsProxy && hasFtpProxy)) {
-      overrideWithEnv(*confOption, oparser, PREF_ALL_PROXY, "all_proxy");
-    }
+    overrideWithEnv(*confOption, oparser, PREF_HTTP_PROXY, "http_proxy");
+    overrideWithEnv(*confOption, oparser, PREF_HTTPS_PROXY, "https_proxy");
+    overrideWithEnv(*confOption, oparser, PREF_FTP_PROXY, "ftp_proxy");
+    overrideWithEnv(*confOption, oparser, PREF_ALL_PROXY, "all_proxy");
     overrideWithEnv(*confOption, oparser, PREF_NO_PROXY, "no_proxy");
     if (!standalone) {
       // For non-standalone mode, set PREF_QUIET to true to suppress

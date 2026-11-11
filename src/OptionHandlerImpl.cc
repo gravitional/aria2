@@ -506,7 +506,8 @@ void HttpProxyOptionHandler::parseArg(Option& option,
   }
   else {
     std::string uri;
-    if (util::startsWith(optarg, "http://") ||
+    if (util::startsWith(optarg, "socks5://") ||
+        util::startsWith(optarg, "http://") ||
         util::startsWith(optarg, "https://") ||
         util::startsWith(optarg, "ftp://")) {
       uri = optarg;
@@ -519,7 +520,9 @@ void HttpProxyOptionHandler::parseArg(Option& option,
     if (!uri::parse(us, uri)) {
       throw DL_ABORT_EX(_("unrecognized proxy format"));
     }
-    us.protocol = "http";
+    if (us.protocol != "socks5") {
+      us.protocol = "http";
+    }
     option.put(pref_, uri::construct(us));
   }
 }

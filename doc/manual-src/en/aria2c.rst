@@ -118,7 +118,10 @@ HTTP/FTP/SFTP Options
   proxy server for a particular protocol using :option:`--http-proxy`,
   :option:`--https-proxy` and :option:`--ftp-proxy` options.  This affects all
   downloads.
-  The format of PROXY is ``[http://][USER:PASSWORD@]HOST[:PORT]``.
+  The format of PROXY is ``[http://][USER:PASSWORD@]HOST[:PORT]`` or
+  ``socks5://HOST[:PORT]``. SOCKS5 proxying is supported for HTTP and HTTPS
+  downloads and uses the proxy's no-authentication method. A SOCKS5 value in
+  ``all_proxy`` takes precedence over protocol-specific HTTP proxy settings.
   See also `ENVIRONMENT`_ section.
 
   .. note::
@@ -1955,16 +1958,17 @@ aria2 recognizes the following environment variables.
   Overrides ftp-proxy value in configuration file.
   The command-line option :option:`--ftp-proxy` overrides this value.
 
-``all_proxy [http://][USER:PASSWORD@]HOST[:PORT]``
+``all_proxy [http://][USER:PASSWORD@]HOST[:PORT] | socks5://HOST[:PORT]``
   Specify proxy server for use if no protocol-specific proxy is specified.
   Overrides all-proxy value in configuration file.
   The command-line option :option:`--all-proxy` overrides this value.
 
 .. note::
 
-  Although aria2 accepts ``ftp://`` and ``https://`` scheme in proxy URI, it
-  simply assumes that ``http://`` is specified and does not change its
-  behavior based on the specified scheme.
+  Although aria2 accepts ``ftp://`` and ``https://`` scheme in HTTP proxy URI,
+  it simply assumes that ``http://`` is specified and does not change its
+  behavior based on the specified scheme. SOCKS5 support applies to HTTP and
+  HTTPS downloads and does not support proxy authentication.
 
 ``no_proxy [DOMAIN,...]``
   Specify a comma-separated list of host names, domains and network addresses

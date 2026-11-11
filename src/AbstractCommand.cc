@@ -662,6 +662,18 @@ std::string getProxyOptionFor(PrefPtr proxyPref, PrefPtr proxyUser,
 // then returns an empty string.
 std::string getProxyUri(const std::string& protocol, const Option* option)
 {
+  // SOCKS5 is currently used for HTTP(S) transfers and takes precedence over
+  // protocol-specific HTTP proxy settings.
+  auto allProxy = makeProxyUri(PREF_ALL_PROXY, PREF_ALL_PROXY_USER,
+                               PREF_ALL_PROXY_PASSWD, option);
+  uri::UriStruct allProxyUri;
+  bool socks5AllProxy = !allProxy.empty() &&
+                        uri::parse(allProxyUri, allProxy) &&
+                        allProxyUri.protocol == "socks5";
+  if (socks5AllProxy && (protocol == "http" || protocol == "https")) {
+    return allProxy;
+  }
+
   if (protocol == "http") {
     return getProxyOptionFor(PREF_HTTP_PROXY, PREF_HTTP_PROXY_USER,
                              PREF_HTTP_PROXY_PASSWD, option);
@@ -673,8 +685,21 @@ std::string getProxyUri(const std::string& protocol, const Option* option)
   }
 
   if (protocol == "ftp" || protocol == "sftp") {
-    return getProxyOptionFor(PREF_FTP_PROXY, PREF_FTP_PROXY_USER,
-                             PREF_FTP_PROXY_PASSWD, option);
+    auto ftpProxy = makeProxyUri(PREF_FTP_PROXY, PREF_FTP_PROXY_USER,
+                                 PREF_FTP_PROXY_PASSWD, option);
+    if (!ftpProxy.empty()) {
+      uri::UriStruct ftpProxyUri;
+      if (uri::parse(ftpProxyUri, ftpProxy) &&
+          ftpProxyUri.protocol != "socks5") {
+        return ftpProxy;
+      }
+      return "";
+    }
+    if (socks5AllProxy) {
+      return "";
+    }
+    return makeProxyUri(PREF_ALL_PROXY, PREF_ALL_PROXY_USER,
+                        PREF_ALL_PROXY_PASSWD, option);
   }
 
   return A2STR::NIL;
